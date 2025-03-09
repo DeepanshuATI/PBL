@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 
 const userSchema = new mongoose.Schema({
-    usernmae:{
+    username:{
         type:String,
         required:true,
         unique:true,
@@ -35,6 +35,7 @@ const userSchema = new mongoose.Schema({
       },
 },{timestamps:true});
 
+
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
@@ -43,3 +44,5 @@ userSchema.pre('save', async function (next) {
 });
 
 export const User = mongoose.model("User",userSchema);
+
+
