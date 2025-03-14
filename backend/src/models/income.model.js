@@ -2,7 +2,8 @@ import mongoose, { Schema } from "mongoose";
 
 const incomeSchema = new Schema(
   {
-    user_id: {
+    
+    user:{
       type: mongoose.Types.ObjectId,
       ref: "User",
       required: true,
@@ -10,7 +11,12 @@ const incomeSchema = new Schema(
     amount: {
       type: Number,
       required: true,
+      validate: {
+        validator: (value) => value > 0,
+        message: "Amount must be a positive number",
+      },
     },
+    
     source: {
       type: String,
       required: true,
@@ -21,10 +27,12 @@ const incomeSchema = new Schema(
     },
     description: {
       type: String,
+      default: "",
     },
+    
   },
   { timestamps: true }
 );
 
-
-export const Income = mongoose.model("Income",incomeSchema);
+const Income = mongoose.model("Income",incomeSchema);
+export default Income;

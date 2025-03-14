@@ -1,28 +1,32 @@
 import mongoose, { Schema } from "mongoose";
 
-const logSchema = new Schema({
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+const logSchema = new Schema(
+  {
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    action: {
+      type: String,
+      required: true, // e.g., "Created Expense", "Updated Budget"
+    },
+    referenceId: {
+      type: Schema.Types.ObjectId,
+      required: true, // Links to the affected Expense, Category, or Budget
+    },
+    referenceType: {
+      type: String,
+      required: true, // e.g., "Expense", "Category", "Budget"
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  action: {
-    type: String,
-    required: true,
-  },
-  details: {
-    type: String,
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
-  budget: {
-    type:Schema.Types.ObjectId,
-    ref:"Budget",
-    required:true,
-}
-});
+  {
+    timestamps: true,
+  }
+);
 
-
-export const Log = mongoose.model("Log",logSchema);
+export const Log = mongoose.model("Log", logSchema);
