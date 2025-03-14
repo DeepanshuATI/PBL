@@ -1,10 +1,10 @@
 import express from 'express';
-import { addLog, getLogs } from '../controllers/log.controller.js';
+import { addLog, getLogs, deleteLog } from '../controllers/log.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-router.post('/', verifyJWT, addLog);
+router.post('/create', verifyJWT, addLog);
 router.get('/', verifyJWT, getLogs);
-
+router.delete("/:log_id", verifyJWT, deleteLog);
 export default router;

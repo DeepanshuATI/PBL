@@ -1,4 +1,5 @@
 import Income from "../models/income.model.js";
+import mongoose  from "mongoose";
 
 // Add Income
 export const addIncome = async (req, res) => {
@@ -68,6 +69,92 @@ export const getIncomes = async (req, res) => {
         res.status(500).json({
             status: "error",
             message: "Failed to fetch incomes",
+            error: err.message,
+        });
+    }
+};
+
+
+// Delete Income
+export const deleteIncome = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({
+                status: "error",
+                message: "Unauthorized: User not identified",
+            });
+        }
+        
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                status: "error",
+                message: "Invalid income ID",
+            });
+        }
+
+        const income = await Income.findOne({ _id: id, user: req.user._id });
+        if (!income) {
+            return res.status(404).json({
+                status: "error",
+                message: "Income not found or not authorized to delete",
+            });
+        }
+
+        await income.deleteOne();
+
+        res.status(200).json({
+            status: "success",
+            message: "Income deleted successfully",
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: "error",
+            message: "Failed to delete income",
+            error: err.message,
+        });
+    }
+};
+
+// Update Income
+export const updateIncome = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { amount, source, date, category } = req.body;
+
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({
+                status: "error",
+                message: "Unauthorized: User not identified",
+            });
+        }
+
+        const income = await Income.findOne({ _id: id, user: req.user._id });
+        if (!income) {
+            return res.status(404).json({
+                status: "error",
+                message: "Income not found or not authorized to update",
+            });
+        }
+
+        // Update fields
+        income.amount = amount || income.amount;
+        income.source = source || income.source;
+        income.date = date || income.date;
+        income.category = category || income.category;
+
+        const updatedIncome = await income.save();
+
+        res.status(200).json({
+            status: "success",
+            message: "Income updated successfully",
+            data: updatedIncome,
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: "error",
+            message: "Failed to update income",
             error: err.message,
         });
     }
