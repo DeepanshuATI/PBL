@@ -11,5 +11,4 @@ router.delete("/:id",verifyJWT,deleteIncome);
 router.put("/:id",verifyJWT,updateIncome);
 
 
-
 export default router;
