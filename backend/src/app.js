@@ -9,6 +9,7 @@ import budgetRoutes from './routes/budget.route.js';
 import analyticsRoutes from './routes/analytic.route.js';
 import logRoutes from './routes/log.route.js';
 import incomeRoutes from './routes/income.route.js';
+import transactionRoutes from "./routes/transaction.route.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use('/api/v1/budgets', budgetRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/logs', logRoutes);
 app.use('/api/v1/incomes', incomeRoutes);
+app.use("/api/v1/transactions", transactionRoutes);
 
 
 
