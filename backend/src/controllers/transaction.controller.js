@@ -1,7 +1,18 @@
-import { Transaction } from "../models/transaction.model.js";
-import  Income  from "../models/income.model.js";
+import Transaction from "../models/transaction.model.js"; 
+import Income from "../models/income.model.js";
 import { Expense } from "../models/expense.model.js";
 import { Category } from "../models/category.model.js";
+
+// Helper Function: Validate Related Model
+const validateRelatedModel = async (type, related_id) => {
+  if (type === "income") {
+    const income = await Income.findById(related_id);
+    if (!income) throw new Error("Related income not found");
+  } else if (type === "expense") {
+    const expense = await Expense.findById(related_id);
+    if (!expense) throw new Error("Related expense not found");
+  }
+};
 
 // Add Transaction
 export const addTransaction = async (req, res) => {
@@ -33,26 +44,8 @@ export const addTransaction = async (req, res) => {
       });
     }
 
-    // Validate related_id based on transaction type
-    if (related_id) {
-      if (type === "income") {
-        const income = await Income.findById(related_id);
-        if (!income) {
-          return res.status(404).json({
-            status: "error",
-            message: "Related income not found",
-          });
-        }
-      } else if (type === "expense") {
-        const expense = await Expense.findById(related_id);
-        if (!expense) {
-          return res.status(404).json({
-            status: "error",
-            message: "Related expense not found",
-          });
-        }
-      }
-    }
+    // Validate related_id
+    if (related_id) await validateRelatedModel(type, related_id);
 
     // Create transaction
     const transaction = new Transaction({
@@ -142,26 +135,8 @@ export const updateTransaction = async (req, res) => {
     const { transaction_id } = req.params;
     const { amount, type, date, category_id, budget_id, related_id, description } = req.body;
 
-    // Validate related_id based on transaction type
-    if (related_id) {
-      if (type === "income") {
-        const income = await Income.findById(related_id);
-        if (!income) {
-          return res.status(404).json({
-            status: "error",
-            message: "Related income not found",
-          });
-        }
-      } else if (type === "expense") {
-        const expense = await Expense.findById(related_id);
-        if (!expense) {
-          return res.status(404).json({
-            status: "error",
-            message: "Related expense not found",
-          });
-        }
-      }
-    }
+    // Validate related_id
+    if (related_id) await validateRelatedModel(type, related_id);
 
     const updatedTransaction = await Transaction.findOneAndUpdate(
       { _id: transaction_id, user: req.user._id },

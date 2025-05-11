@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
+
 const expenseSchema = new Schema(
   {
     user: {
@@ -7,21 +8,29 @@ const expenseSchema = new Schema(
       ref: "User",
       required: true, // Links the expense to a user
     },
+
     amount: {
       type: Number,
       required: true,
     },
+
     description: {
       type: String,
       trim: true,
     },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-      required: true, // Links the expense to a category
+
+    icon: {
+      type:String, 
     },
+
+    category: {
+      type:String,
+      required:true
+    },
+  
     date: {
       type: Date,
+      required:true,
       default: Date.now, // Date of the expense
     },
   },

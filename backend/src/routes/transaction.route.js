@@ -9,16 +9,10 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-
-router.post("/", verifyJWT, addTransaction);
-
-
+// Transactions routes
 router.get("/", verifyJWT, getTransactions);
-
-
+router.post("/", verifyJWT, addTransaction);
 router.put("/:transaction_id", verifyJWT, updateTransaction);
-
-
 router.delete("/:transaction_id", verifyJWT, deleteTransaction);
 
 export default router;

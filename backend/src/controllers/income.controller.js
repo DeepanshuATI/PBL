@@ -1,10 +1,14 @@
 import Income from "../models/income.model.js";
+import { User } from "../models/user.model.js";
 import mongoose  from "mongoose";
+import { asyncHandler } from "../utils/asyncHandler.js";
+
 
 // Add Income
-export const addIncome = async (req, res) => {
+export const addIncome = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
     try {
-        const { amount, source, date, category } = req.body;
+        const { icon, amount, source, date, category } = req.body;
 
         // Validate user
         if (!req.user || !req.user._id) {
@@ -24,11 +28,11 @@ export const addIncome = async (req, res) => {
 
         // Create income
         const income = new Income({
-            user: req.user._id, // Attach user ID from middleware
+            userId,
+            icon, // Attach user ID from middleware
             amount,
             source,
-            date,
-            category, // Optional
+            date: new Date(date),
         });
 
         // Save income
@@ -45,10 +49,10 @@ export const addIncome = async (req, res) => {
             error: err.message,
         });
     }
-};
+});
 
 // Get Incomes
-export const getIncomes = async (req, res) => {
+export const getIncomes = asyncHandler(async (req, res) => {
     try {
         // Validate user
         if (!req.user || !req.user._id) {
@@ -72,11 +76,11 @@ export const getIncomes = async (req, res) => {
             error: err.message,
         });
     }
-};
+});
 
 
 // Delete Income
-export const deleteIncome = async (req, res) => {
+export const deleteIncome = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -115,10 +119,10 @@ export const deleteIncome = async (req, res) => {
             error: err.message,
         });
     }
-};
+});
 
 // Update Income
-export const updateIncome = async (req, res) => {
+export const updateIncome = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
         const { amount, source, date, category } = req.body;
@@ -158,4 +162,49 @@ export const updateIncome = async (req, res) => {
             error: err.message,
         });
     }
-};
+});
+
+
+
+import xlsx from "xlsx";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Fix __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export const downloadIncomeExcel = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    try {
+        const income = await Income.find({ userId }).sort({ date: -1 });
+
+        // Prepare data for Excel
+        const data = income.map((item) => ({
+            Source: item.source,
+            Amount: item.amount,
+            Date: item.date,
+        }));
+
+        // Create Excel file
+        const wb = xlsx.utils.book_new();
+        const ws = xlsx.utils.json_to_sheet(data);
+        xlsx.utils.book_append_sheet(wb, ws, "Income");
+
+        // Define a proper path for the Excel file
+        const filePath = path.join(__dirname, "../data/income_details.xlsx");
+
+        // Save the file
+        xlsx.writeFile(wb, filePath);
+
+        // Send the file to the user
+        res.download(filePath, "Income_details.xlsx", (err) => {
+            if (err) {
+                console.error("Error downloading file:", err);
+                res.status(500).json({ message: "File download failed", error: err.message });
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+});
