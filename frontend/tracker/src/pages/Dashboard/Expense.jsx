@@ -81,20 +81,32 @@ function Expense() {
 
 
        //delete expense
-  const deleteExpense = async(id) => {
-    try {
-      await axiosInstance.dalete(API_PATHS.EXPENSE.DELETE_EXPENSE(id))
+const deleteExpense = async (id) => {
+  try {
+    // Make sure the token is passed in the headers for authentication
+    await axiosInstance.delete(API_PATHS.EXPENSE.DELETE_EXPENSE(id), {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Pass token from localStorage
+      },
+    });
 
-      setOpenDeleteAlert({ show: false, date: null});
-      toast.success("Expense details deleted successfully");
-      fetchExpenseDetails();
-    } catch (error) {
-      console.error(
-        "Error deleting expense:",
-        error.response?.data?.message || error.message
-      );
-    }
-  };
+    // Show alert after deletion
+    setOpenDeleteAlert({ show: true, data: id });
+
+    // Display success notification
+    toast.success("Expense details deleted successfully");
+
+    // Refresh the expense list after deletion
+    fetchExpenseDetails();
+  } catch (error) {
+    console.error(
+      "Error deleting expense:",
+      error.response?.data?.message || error.message
+    );
+    toast.error(error.response?.data?.message || 'Failed to delete expense');
+  }
+};
+
 
    //handle downalod expense details
   const handleDownloadExpenseDetails = async () => {

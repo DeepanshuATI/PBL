@@ -1,14 +1,12 @@
-import Income from "../models/income.model.js";
+{/* import Income from "../models/income.model.js";
 import { User } from "../models/user.model.js";
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
-
 
 // Add Income
 export const addIncome = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
     try {
-        const { icon, amount, source, date, category } = req.body;
+        const { icon, amount, source, date, description } = req.body;
 
         // Validate user
         if (!req.user || !req.user._id) {
@@ -28,11 +26,12 @@ export const addIncome = asyncHandler(async (req, res) => {
 
         // Create income
         const income = new Income({
-            userId,
-            icon, // Attach user ID from middleware
+            user: req.user._id, // Use user reference (not userId)
+            icon,
             amount,
             source,
             date: new Date(date),
+            description, // Adding description if passed
         });
 
         // Save income
@@ -54,7 +53,8 @@ export const addIncome = asyncHandler(async (req, res) => {
 // Get Incomes
 export const getIncomes = asyncHandler(async (req, res) => {
     try {
-        // Validate user
+        console.log("User:", req.user);  // Debugging line
+
         if (!req.user || !req.user._id) {
             return res.status(401).json({
                 status: "error",
@@ -62,7 +62,6 @@ export const getIncomes = asyncHandler(async (req, res) => {
             });
         }
 
-        // Fetch incomes
         const incomes = await Income.find({ user: req.user._id }).sort({ date: -1 });
 
         res.status(200).json({
@@ -78,7 +77,6 @@ export const getIncomes = asyncHandler(async (req, res) => {
     }
 });
 
-
 // Delete Income
 export const deleteIncome = asyncHandler(async (req, res) => {
     try {
@@ -90,7 +88,7 @@ export const deleteIncome = asyncHandler(async (req, res) => {
                 message: "Unauthorized: User not identified",
             });
         }
-        
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
                 status: "error",
@@ -125,7 +123,7 @@ export const deleteIncome = asyncHandler(async (req, res) => {
 export const updateIncome = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
-        const { amount, source, date, category } = req.body;
+        const { amount, source, date, category, description } = req.body;
 
         if (!req.user || !req.user._id) {
             return res.status(401).json({
@@ -147,6 +145,7 @@ export const updateIncome = asyncHandler(async (req, res) => {
         income.source = source || income.source;
         income.date = date || income.date;
         income.category = category || income.category;
+        income.description = description || income.description;
 
         const updatedIncome = await income.save();
 
@@ -164,8 +163,7 @@ export const updateIncome = asyncHandler(async (req, res) => {
     }
 });
 
-
-
+// Download Income as Excel
 import xlsx from "xlsx";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -177,13 +175,14 @@ const __dirname = path.dirname(__filename);
 export const downloadIncomeExcel = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     try {
-        const income = await Income.find({ userId }).sort({ date: -1 });
+        const income = await Income.find({ user: userId }).sort({ date: -1 });
 
         // Prepare data for Excel
         const data = income.map((item) => ({
             Source: item.source,
             Amount: item.amount,
             Date: item.date,
+            Description: item.description, // Include description
         }));
 
         // Create Excel file
@@ -208,3 +207,160 @@ export const downloadIncomeExcel = asyncHandler(async (req, res) => {
         res.status(500).json({ message: "Server Error", error: error.message });
     }
 });
+*/}
+
+
+    
+    import Income from "../models/income.model.js";
+import { User } from "../models/user.model.js";
+import mongoose from "mongoose";
+import { asyncHandler } from "../utils/asyncHandler.js";
+
+// Add Income
+export const addIncome = async (req, res) => {
+  try {
+    const { user, icon, amount, source, date, description } = req.body;
+
+    const newIncome = new Income({
+      user,
+      icon,
+      amount,
+      source,
+      date,
+      description,
+    });
+
+    await newIncome.save();
+    res.status(201).json({ message: "Income created successfully", data: newIncome });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Get all income entries
+export const getIncomes = async (req, res) => {
+  try {
+    const incomes = await Income.find().populate("user", "username email"); // Populate with user details
+    res.status(200).json(incomes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Get income entries for a specific user
+export const getUserIncomes = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const incomes = await Income.find({ user: userId }).populate("user", "username email");
+    res.status(200).json(incomes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Get a specific income entry by ID
+export const getIncomeById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const income = await Income.findById(id).populate("user", "username email");
+    if (!income) {
+      return res.status(404).json({ message: "Income not found" });
+    }
+    res.status(200).json(income);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Update an existing income entry
+export const updateIncome = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { icon, amount, source, date, description } = req.body;
+
+    const updatedIncome = await Income.findByIdAndUpdate(
+      id,
+      { icon, amount, source, date, description },
+      { new: true }
+    );
+
+    if (!updatedIncome) {
+      return res.status(404).json({ message: "Income not found" });
+    }
+
+    res.status(200).json({ message: "Income updated successfully", data: updatedIncome });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Delete an income entry
+export const deleteIncome = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedIncome = await Income.findByIdAndDelete(id);
+
+    if (!deletedIncome) {
+      return res.status(404).json({ message: "Income not found" });
+    }
+
+    res.status(200).json({ message: "Income deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Download Income as Excel
+import xlsx from "xlsx";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Fix __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export const downloadIncomeExcel = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    try {
+        const income = await Income.find({ user: userId }).sort({ date: -1 });
+
+        // Prepare data for Excel
+        const data = income.map((item) => ({
+            Source: item.source,
+            Amount: item.amount,
+            Date: item.date,
+            Description: item.description, // Include description
+        }));
+
+        // Create Excel file
+        const wb = xlsx.utils.book_new();
+        const ws = xlsx.utils.json_to_sheet(data);
+        xlsx.utils.book_append_sheet(wb, ws, "Income");
+
+        // Define a proper path for the Excel file
+        const filePath = path.join(__dirname, "../data/income_details.xlsx");
+
+        // Save the file
+        xlsx.writeFile(wb, filePath);
+
+        // Send the file to the user
+        res.download(filePath, "Income_details.xlsx", (err) => {
+            if (err) {
+                console.error("Error downloading file:", err);
+                res.status(500).json({ message: "File download failed", error: err.message });
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+});
+
+
+    
+    

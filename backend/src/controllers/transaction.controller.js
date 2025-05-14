@@ -1,4 +1,4 @@
-import Transaction from "../models/transaction.model.js"; 
+import Transaction from "../models/transaction.model.js";
 import Income from "../models/income.model.js";
 import { Expense } from "../models/expense.model.js";
 import { Category } from "../models/category.model.js";
@@ -17,7 +17,7 @@ const validateRelatedModel = async (type, related_id) => {
 // Add Transaction
 export const addTransaction = async (req, res) => {
   try {
-    const { amount, type, date, category_id, budget_id, related_id, description } = req.body;
+    const { amount, type, date, category_id, budget_id, related_id, description, source } = req.body;
 
     // Validate required fields
     if (!amount || !type || !date || !category_id) {
@@ -44,6 +44,14 @@ export const addTransaction = async (req, res) => {
       });
     }
 
+    // Validate source for income transactions
+    if (type === "income" && !source) {
+      return res.status(400).json({
+        status: "error",
+        message: "Source is required for income transactions",
+      });
+    }
+
     // Validate related_id
     if (related_id) await validateRelatedModel(type, related_id);
 
@@ -58,6 +66,7 @@ export const addTransaction = async (req, res) => {
       relatedModel: related_id || null,
       modelType: type === "income" ? "Income" : "Expense",
       description,
+      source: type === "income" ? source : null, // Only assign source for income type
     });
 
     const savedTransaction = await transaction.save();
@@ -133,7 +142,15 @@ export const deleteTransaction = async (req, res) => {
 export const updateTransaction = async (req, res) => {
   try {
     const { transaction_id } = req.params;
-    const { amount, type, date, category_id, budget_id, related_id, description } = req.body;
+    const { amount, type, date, category_id, budget_id, related_id, description, source } = req.body;
+
+    // Validate source for income transactions
+    if (type === "income" && !source) {
+      return res.status(400).json({
+        status: "error",
+        message: "Source is required for income transactions",
+      });
+    }
 
     // Validate related_id
     if (related_id) await validateRelatedModel(type, related_id);
@@ -149,6 +166,7 @@ export const updateTransaction = async (req, res) => {
         relatedModel: related_id || null,
         modelType: type === "income" ? "Income" : "Expense",
         description,
+        source: type === "income" ? source : null, // Only assign source for income type
       },
       { new: true, runValidators: true }
     );

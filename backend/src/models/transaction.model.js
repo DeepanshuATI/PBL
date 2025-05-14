@@ -49,6 +49,13 @@ const TransactionSchema = new Schema(
       trim: true,
       default: "",
     },
+    // Source field for income transactions
+    source: {
+      type: String,
+      required: function () {
+        return this.type === "income"; // Ensure 'source' is required only for income transactions
+      },
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt timestamps
