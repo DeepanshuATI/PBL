@@ -17,21 +17,37 @@ const Income = () => {
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ show: false, data: null });
   const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
 
-  const fetchIncomeDetails = async () => {
-    if (loading) return;
-    setLoading(true);
+const fetchIncomeDetails = async () => {
+  if (loading) return;
+  setLoading(true);
 
-    try {
-      const response = await axiosInstance.get(`${API_PATHS.INCOME.GET_ALL_INCOMES}`);
-      if (response.data) {
-        setIncomeData(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching income data:", error);
-    } finally {
+  try {
+    const { user } = useAuthContext(); // Replace with your context or state logic
+    const userId = user?._id;
+
+    if (!userId) {
+      console.error("User ID is not available.");
+      toast.error("Failed to fetch income details. User ID is missing.");
       setLoading(false);
+      return;
     }
-  };
+
+    const endpoint = API_PATHS.INCOME.GET_ALL_INCOMES(userId); // Pass the actual user ID
+    const response = await axiosInstance.get(endpoint);
+
+    if (response.data) {
+      setIncomeData(response.data);
+    }
+  } catch (error) {
+    console.error("Error fetching income data:", error.response || error.message);
+    toast.error("Failed to fetch income details. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   const handleAddIncome = async (income) => {
     const { source = "", amount, date, icon = "" } = income || {};

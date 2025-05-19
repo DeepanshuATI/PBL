@@ -125,16 +125,14 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false); // For button loading state
+  const [loading, setLoading] = useState(false);
 
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  // Handle Login Form Submit
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Validate email and password
     if (!email || !password) {
       setError("Both email and password are required.");
       return;
@@ -145,27 +143,24 @@ const Login = () => {
       return;
     }
 
-    setError(""); // Clear previous errors
-    setLoading(true); // Show loading state
+    setError("");
+    setLoading(true);
 
     try {
-      // Login API call
       const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, { email, password });
       console.log("Login Response:", response);
 
       const { accessToken, user } = response.data.data;
 
-      // Check if accessToken is available
       if (accessToken) {
-        localStorage.setItem("token", accessToken);
-        updateUser(user);
-        navigate("/dashboard"); // Navigate to dashboard after successful login
+        localStorage.setItem("token", accessToken); // Store token in localStorage
+        updateUser(user); // Update context and localStorage
+        navigate("/dashboard");
       } else {
         throw new Error("Login failed: Token not received.");
       }
     } catch (error) {
       console.error("Login error:", error.response?.data || error);
-
       if (error.response) {
         setError(error.response.data.message || "An unexpected error occurred.");
       } else if (error.code === "ERR_NETWORK") {
@@ -174,7 +169,7 @@ const Login = () => {
         setError("Something went wrong! Please try again.");
       }
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 

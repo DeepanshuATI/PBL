@@ -16,7 +16,7 @@ export const API_PATHS = {
 
     INCOME: {
        ADD_INCOME:"/api/v1/incomes/add",
-       GET_ALL_INCOMES: "/api/v1/incomes/get",
+       GET_ALL_INCOMES: (userId) => `/api/v1/incomes/user/${userId}`,
        DELETE_INCOME: (incomeId) => `/api/v1/incomes/${incomeId}`,
        DOWNLOAD_INCOME:`/api/v1/incomes/downloadexcel`,
     },

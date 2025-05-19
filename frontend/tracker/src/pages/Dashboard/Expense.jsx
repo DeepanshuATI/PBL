@@ -108,7 +108,7 @@ const deleteExpense = async (id) => {
 };
 
 
-   //handle downalod expense details
+   //handle download expense details
   const handleDownloadExpenseDetails = async () => {
     try {
       const response = await axiosInstance.get(
