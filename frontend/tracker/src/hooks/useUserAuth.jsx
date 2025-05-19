@@ -45,40 +45,43 @@ import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
 
 export const useUserAuth = () => {
-    const { user, updateUser, clearUser } = useContext(UserContext);
-    const navigate = useNavigate();
+  const { user, updateUser, clearUser } = useContext(UserContext);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        if (user) return;
+  useEffect(() => {
+    if (user) return;
 
-        let isMounted = true;
+    let isMounted = true;
 
-        const fetchUserInfo = async () => {
-            try {
-                const response = await axiosInstance.get(API_PATHS.AUTH.GET_USER_INFO);
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axiosInstance.get(API_PATHS.AUTH.GET_USER_INFO);
 
-                if (isMounted && response?.data) {
-                    console.log("Fetched user info:", response.data);
-                    updateUser(response.data);
-                }
-            } catch (error) {
-                console.error("Error fetching user info:", {
-                    message: error.message,
-                    status: error.response?.status,
-                    data: error.response?.data,
-                });
+        if (isMounted && response?.data) {
+          console.log("Fetched user info:", response.data);
+          updateUser(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching user info:", {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+        });
 
-                if (isMounted) {
-                    clearUser();
-                    navigate("/login");
-                }
-            }
-        };
+        if (isMounted) {
+          clearUser();
+          navigate("/login");
+        }
+      }
+    };
 
-        fetchUserInfo();
+    fetchUserInfo();
 
-        return () => {
-            isMounted = false;
-        };
-    }, [user, updateUser, clearUser, navigate]);
+    return () => {
+      isMounted = false;
+    };
+  }, [user, updateUser, clearUser, navigate]);
+
+  // **Add this return so the caller gets the context values!**
+  return { user, updateUser, clearUser };
 };

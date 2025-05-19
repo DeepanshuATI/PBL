@@ -11,43 +11,37 @@ import DeleteAlert from "../../components/DeleteAlert";
 import { useUserAuth } from "../../hooks/useUserAuth";
 
 const Income = () => {
-  useUserAuth();
+  const { user } = useUserAuth();
   const [incomeData, setIncomeData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ show: false, data: null });
   const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
 
-const fetchIncomeDetails = async () => {
-  if (loading) return;
-  setLoading(true);
+  const fetchIncomeDetails = async () => {
+    if (loading) return;
 
-  try {
-    const { user } = useAuthContext(); // Replace with your context or state logic
-    const userId = user?._id;
-
-    if (!userId) {
+    if (!user || !user._id) {
       console.error("User ID is not available.");
-      toast.error("Failed to fetch income details. User ID is missing.");
-      setLoading(false);
+      toast.error("User information is missing. Please log in again.");
       return;
     }
 
-    const endpoint = API_PATHS.INCOME.GET_ALL_INCOMES(userId); // Pass the actual user ID
-    const response = await axiosInstance.get(endpoint);
+    setLoading(true);
 
-    if (response.data) {
-      setIncomeData(response.data);
+    try {
+      const endpoint = API_PATHS.INCOME.GET_ALL_INCOMES(user._id);
+      const response = await axiosInstance.get(endpoint);
+
+      if (response.data) {
+        setIncomeData(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching income data:", error.response || error.message);
+      toast.error("Failed to fetch income details. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching income data:", error.response || error.message);
-    toast.error("Failed to fetch income details. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
+  };
 
   const handleAddIncome = async (income) => {
     const { source = "", amount, date, icon = "" } = income || {};
@@ -110,8 +104,15 @@ const fetchIncomeDetails = async () => {
   };
 
   useEffect(() => {
-    fetchIncomeDetails();
-  }, []);
+    if (user && user._id) {
+      fetchIncomeDetails();
+    }
+  }, [user]);
+
+  if (!user) {
+    // Optional: Show loading or login prompt while user info is fetched
+    return <div>Loading user information...</div>;
+  }
 
   return (
     <DashboardLayout activeMenu="Income">

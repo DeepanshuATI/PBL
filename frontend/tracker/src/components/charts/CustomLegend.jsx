@@ -13,7 +13,7 @@ const CustomLegend = ({ payload }) => {
                    {entry.value}    
                 </span>   
             </div>    
-        })};
+        })}
     </div>
   );
 };
