@@ -27,57 +27,59 @@ const generateAccessAndRefereshTokens = async(userId) =>{
 const registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, username, password } = req.body;
 
+  // Validate inputs - ensure none of these fields are missing or empty after trimming
   if (
-    [fullName, email, username, password].some((field) => field?.trim() === "")
+    !fullName?.trim() ||
+    !email?.trim() ||
+    !username?.trim() ||
+    !password?.trim()
   ) {
-    throw new ApiError(400, "All fields are required");
+    throw new ApiError(400, "All fields (fullName, email, username, password) are required");
   }
 
+  // Normalize username to lowercase before searching or saving
+  const normalizedUsername = username.trim().toLowerCase();
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // Check if username or email already exists in the database
   const existedUser = await User.findOne({
-    $or: [{ username }, { email }],
+    $or: [{ username: normalizedUsername }, { email: normalizedEmail }],
   });
 
   if (existedUser) {
-    throw new ApiError(409, "User with email or username already exists");
+    throw new ApiError(409, "User with this email or username already exists");
   }
 
-  let coverImageLocalPath;
-  if (
-    req.files &&
-    Array.isArray(req.files.coverImage) &&
-    req.files.coverImage.length > 0
-  ) {
-    coverImageLocalPath = req.files.coverImage[0].path;
-  }
-
+  // Create new user with normalized username and email
   const user = await User.create({
-    fullName,
-    email,
+    fullName: fullName.trim(),
+    email: normalizedEmail,
     password,
-    username: username.toLowerCase(),
+    username: normalizedUsername,
   });
 
-  const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
-    user._id
-  );
+  // Generate access and refresh tokens for the user
+  const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id);
 
-  const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken"
-  );
+  // Retrieve user data to send back (excluding sensitive info)
+  const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
   if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering the user");
   }
 
-  const options = {
+  // Cookie options - use secure only in production (https)
+  const cookieOptions = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production", // Secure only in prod
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days cookie expiry
   };
 
   return res
     .status(201)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
       new ApiResponse(
         201,
@@ -90,6 +92,7 @@ const registerUser = asyncHandler(async (req, res) => {
       )
     );
 });
+
 
 
 

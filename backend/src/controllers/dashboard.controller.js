@@ -3,32 +3,32 @@ import { Expense } from "../models/expense.model.js";
 import { Types } from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-// Helper function to get the sum of transactions in the last 60 days
 const getTransactionsSumLast60Days = async (userId, model) => {
   const transactions = await model.find({
-    userId,
-    date: { $gte: new Date(Date.now() - 60 * 24 * 60 * 1000) }
+    user: new Types.ObjectId(userId),
+    date: { $gte: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) },
   }).sort({ date: -1 });
 
   return transactions;
 };
 
-// Dashboard data
 export const getDashboardData = asyncHandler(async (req, res) => {
   try {
-    const userId = req.user.id;
-    const userObjectId = new Types.ObjectId(String(userId));
+    const userId = req.user._id;
 
     // Fetch total incomes and expenses
     const totalIncome = await Income.aggregate([
-      { $match: { userId: userObjectId } },
+      { $match: { user: new Types.ObjectId(userId) } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
 
     const totalExpense = await Expense.aggregate([
-      { $match: { userId: userObjectId } },
+      { $match: { user: new Types.ObjectId(userId) } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
+
+    const totalIncomeValue = totalIncome.length > 0 ? totalIncome[0].total : 0;
+    const totalExpenseValue = totalExpense.length > 0 ? totalExpense[0].total : 0;
 
     // Get income and expense for the last 60 days
     const incomeLast60Days = await getTransactionsSumLast60Days(userId, Income);
@@ -38,31 +38,37 @@ export const getDashboardData = asyncHandler(async (req, res) => {
     const expenseLast60DaysTotal = expenseLast60Days.reduce((sum, transaction) => sum + transaction.amount, 0);
 
     // Fetch the last 5 transactions
-    const recentIncomeTransactions = await Income.find({ userId }).sort({ date: -1 }).limit(5);
-    const recentExpenseTransactions = await Expense.find({ userId }).sort({ date: -1 }).limit(5);
+    const recentIncomeTransactions = await Income.find({ user: new Types.ObjectId(userId) })
+      .sort({ date: -1 })
+      .limit(5);
+
+    const recentExpenseTransactions = await Expense.find({ user: new Types.ObjectId(userId) })
+      .sort({ date: -1 })
+      .limit(5);
 
     const lastTransaction = [
       ...recentIncomeTransactions.map(txn => ({ ...txn.toObject(), type: "income" })),
-      ...recentExpenseTransactions.map(txn => ({ ...txn.toObject(), type: "expense" }))
-    ].sort((a, b) => b.date - a.date);
+      ...recentExpenseTransactions.map(txn => ({ ...txn.toObject(), type: "expense" })),
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     res.json({
-      totalBalance: (totalIncome[0]?.total || 0) - (totalExpense[0]?.total || 0),
-      totalIncome: totalIncome[0]?.total || 0,
-      totalExpense: totalExpense[0]?.total || 0,
+      totalBalance: totalIncomeValue - totalExpenseValue,
+      totalIncome: totalIncomeValue,
+      totalExpense: totalExpenseValue,
       last60DaysIncome: { total: incomeLast60DaysTotal, transactions: incomeLast60Days },
       last60DaysExpense: { total: expenseLast60DaysTotal, transactions: expenseLast60Days },
       recentTransactions: lastTransaction,
     });
-
   } catch (err) {
+    console.error("Error in getDashboardData:", err.message);
     res.status(500).json({
       status: "error",
-      message: "Server Error",
+      message: "An error occurred while fetching dashboard data",
       error: err.message,
     });
   }
 });
+
 
 
   

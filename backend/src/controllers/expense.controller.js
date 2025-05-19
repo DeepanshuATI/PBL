@@ -187,7 +187,7 @@ export const downloadExpenseExcel = asyncHandler(async (req, res) => {
             Description: item.description,
             Amount: item.amount,
             Category: item.category,
-            Date: item.date,
+            Date: new Date(item.date).toLocaleDateString("en-US"),
         }));
 
         const wb = xlsx.utils.book_new();
