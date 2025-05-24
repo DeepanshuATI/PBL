@@ -32,10 +32,10 @@ export const getDashboardData = asyncHandler(async (req, res) => {
 
     // Get income and expense for the last 60 days
     const incomeLast60Days = await getTransactionsSumLast60Days(userId, Income);
-    const expenseLast60Days = await getTransactionsSumLast60Days(userId, Expense);
+    const expenseLast30Days = await getTransactionsSumLast60Days(userId, Expense);
 
     const incomeLast60DaysTotal = incomeLast60Days.reduce((sum, transaction) => sum + transaction.amount, 0);
-    const expenseLast60DaysTotal = expenseLast60Days.reduce((sum, transaction) => sum + transaction.amount, 0);
+    const expenseLast30DaysTotal = expenseLast30Days.reduce((sum, transaction) => sum + transaction.amount, 0);
 
     // Fetch the last 5 transactions
     const recentIncomeTransactions = await Income.find({ user: new Types.ObjectId(userId) })
@@ -56,7 +56,7 @@ export const getDashboardData = asyncHandler(async (req, res) => {
       totalIncome: totalIncomeValue,
       totalExpense: totalExpenseValue,
       last60DaysIncome: { total: incomeLast60DaysTotal, transactions: incomeLast60Days },
-      last60DaysExpense: { total: expenseLast60DaysTotal, transactions: expenseLast60Days },
+      last30DaysExpense: { total: expenseLast30DaysTotal, transactions: expenseLast30Days },
       recentTransactions: lastTransaction,
     });
   } catch (err) {
