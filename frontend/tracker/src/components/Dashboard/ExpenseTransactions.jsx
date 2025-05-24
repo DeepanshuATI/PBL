@@ -1,11 +1,40 @@
-import React from 'react';
-import moment from "moment";
+import React, { useEffect, useState } from 'react';
+import moment from 'moment';
 import { LuArrowRight } from 'react-icons/lu';
 import TransactionInfoCard from '../cards/TransactionInfoCard';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
 
-const ExpenseTransactions = ({ transactions, onSeeMore }) => {
-  // Ensure transactions is an array
-  if (!Array.isArray(transactions)) {
+const ExpenseTransactions = ({ onSeeMore }) => {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  
+  const fetchExpenseDetails = async () => {
+    if (loading) return; 
+    setLoading(true);
+
+    try {
+      const response = await axiosInstance.get(API_PATHS.EXPENSE.GET_ALL_EXPENSE);
+      if (response.data) {
+        setTransactions(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch transactions:', error.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExpenseDetails();
+  }, []);
+
+  if (loading) {
+    return <div>Loading transactions...</div>;
+  }
+
+  if (!Array.isArray(transactions) || transactions.length === 0) {
     return <div>No transactions available</div>;
   }
 
@@ -24,7 +53,7 @@ const ExpenseTransactions = ({ transactions, onSeeMore }) => {
             key={expense._id}
             title={expense.category}
             icon={expense.icon}
-            date={moment(expense.date).format("DD MM YYYY")}
+            date={moment(expense.date).format('DD MM YYYY')}
             amount={expense.amount}
             type="expense"
             hideDeleteBtn

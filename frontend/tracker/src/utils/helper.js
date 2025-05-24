@@ -29,13 +29,15 @@ export const  addThousandsSeparator = (num) => {
 
 
 export const prepareExpenseBarChartData = (data = []) => {
-    const chartData = data.map((item) => ({
-        category: item?.category,
-        amount: item?.amount,
-    }));
-
-    return chartData;
+  console.log("Input data to prepareExpenseBarChartData:", data);
+  const chartData = data.map(item => ({
+    category: item?.category || "Unknown",
+    amount: Number(item?.amount) || 0,
+  }));
+  console.log("Output chartData:", chartData);
+  return chartData;
 };
+
 
 
 export const prepareIncomeBarChartData = (data = []) => {

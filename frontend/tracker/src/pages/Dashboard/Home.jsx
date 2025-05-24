@@ -143,7 +143,7 @@ const Home = () => {
   useUserAuth();
   const navigate = useNavigate();
 
-  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardData, setDashboardData] = useState();
   const [loading, setLoading] = useState(false);
 
   const fetchDashboardData = async () => {
@@ -220,7 +220,7 @@ const Home = () => {
             transactions={last30DayExpenseTransactions}
             onSeeMore={() => navigate("/expense")}
           />
-          <Last30DayExpense date={last30DayExpenseTransactions} />
+          <Last30DayExpense data={last30DayExpenseTransactions} />
           <RecentIncomeWithChart
             data={slicedIncomeTransactions}
             totalIncome={dashboardData?.totalIncome || 0}

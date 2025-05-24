@@ -91,7 +91,7 @@ const CustomBarChart = ({ data }) => {
           <BarChart data={data}>
             <CartesianGrid stroke="#f5f5f5" />
             <XAxis
-              dataKey="month"
+              dataKey="category"
               tick={{ fontSize: 12, fill: "#555" }}
               stroke="none"
             />
