@@ -21,7 +21,7 @@ function Expense() {
     });
     const [openAddExpenseModal, setOpenAddExpenseModal] = useState(false);
 
-   //get all expense
+   
     const fetchExpenseDetails = async () => {
       if (loading) return;
       setLoading(true);
@@ -41,7 +41,7 @@ function Expense() {
       }
     };
   
-    //handle expense
+   
     const handleAddExpense = async (expense) => {
       const { category, amount, date, icon } = expense;
   
@@ -80,23 +80,23 @@ function Expense() {
     };
 
 
-       //delete expense
+       
 const deleteExpense = async (id) => {
   try {
-    // Make sure the token is passed in the headers for authentication
+    
     await axiosInstance.delete(API_PATHS.EXPENSE.DELETE_EXPENSE(id), {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Pass token from localStorage
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`, 
       },
     });
 
-    // Show alert after deletion
+    
     setOpenDeleteAlert({ show: true, data: id });
 
-    // Display success notification
+    
     toast.success("Expense details deleted successfully");
 
-    // Refresh the expense list after deletion
+    
     fetchExpenseDetails();
   } catch (error) {
     console.error(
@@ -108,7 +108,7 @@ const deleteExpense = async (id) => {
 };
 
 
-   //handle download expense details
+   
   const handleDownloadExpenseDetails = async () => {
     try {
       const response = await axiosInstance.get(
