@@ -63,8 +63,8 @@ const SignUp = () => {
       const { accessToken, user } = response.data.data;
 
       if (accessToken) {
-        localStorage.setItem("token", accessToken); // Store token in localStorage
-        updateUser(user); // Update context and localStorage
+        localStorage.setItem("token", accessToken); 
+        updateUser(user); 
         navigate("/dashboard");
       }
     } catch (error) {
