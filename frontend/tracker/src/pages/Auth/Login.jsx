@@ -39,8 +39,8 @@ const Login = () => {
       const { accessToken, user } = response.data.data;
 
       if (accessToken) {
-        localStorage.setItem("token", accessToken); // Store token in localStorage
-        updateUser(user); // Update context and localStorage
+        localStorage.setItem("token", accessToken); 
+        updateUser(user); 
         navigate("/dashboard");
       } else {
         throw new Error("Login failed: Token not received.");
