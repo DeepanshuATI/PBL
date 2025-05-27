@@ -110,7 +110,7 @@ const Income = () => {
   }, [user]);
 
   if (!user) {
-    // Optional: Show loading or login prompt while user info is fetched
+    
     return <div>Loading user information...</div>;
   }
 
