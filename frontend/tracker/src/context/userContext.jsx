@@ -6,12 +6,10 @@ export const UserContext = createContext();
 const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     
-   //function to update user data
    const updateUser = (userData) => {
     setUser(userData);
    };
 
-   //Function to clear user data (logout)
    const clearUser = () => {
       setUser(null);  
    };
