@@ -11,12 +11,11 @@ const FinanceOverview = ({ totalBalance, totalIncome, totalExpense }) => {
         { name: "Total Income", amount: totalIncome },
     ];
 
-    // Sanitize the amount to remove any unwanted characters like semi-colons, etc.
     const sanitizeAmount = (amount) => {
         if (typeof amount === 'string') {
-            return amount.replace(/[;^%$]/g, '');  // Remove unwanted characters
+            return amount.replace(/[;^%$]/g, '');  
         }
-        return `₹${amount.toFixed(2)}`;  // For numeric values, format them with ₹
+        return `₹${amount.toFixed(2)}`;  
     };
 
     return (
@@ -28,7 +27,7 @@ const FinanceOverview = ({ totalBalance, totalIncome, totalExpense }) => {
             <CustomPieChart
                 data={balanceData}
                 label="Total Balance"
-                totalAmount={sanitizeAmount(totalBalance)}  // Safe formatting
+                totalAmount={sanitizeAmount(totalBalance)} 
                 colors={COLORS}
                 showTextAnchor
             />
