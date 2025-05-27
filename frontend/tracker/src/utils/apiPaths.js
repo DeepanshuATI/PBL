@@ -1,6 +1,6 @@
 export const Base_URL = "http://localhost:5000";
 
-//utils/api/paths.js
+
 export const API_PATHS = {
     AUTH:{
         LOGIN:"/api/v1/users/login",
