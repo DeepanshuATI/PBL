@@ -68,7 +68,7 @@ const IncomeOverview = ({ transactions=[], onAddIncome }) => {
 IncomeOverview.propTypes = {
   transactions: PropTypes.arrayOf(
     PropTypes.shape({
-      date: PropTypes.string.isRequired, // Ensure valid date strings
+      date: PropTypes.string.isRequired, // Ensure karlena ki date strings valid  ho
       amount: PropTypes.number.isRequired,
       source: PropTypes.string.isRequired,
     })
