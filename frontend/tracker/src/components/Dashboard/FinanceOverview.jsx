@@ -10,7 +10,7 @@ const FinanceOverview = ({ totalBalance, totalIncome, totalExpense }) => {
         { name: "Total Expense", amount: totalExpense },
         { name: "Total Income", amount: totalIncome },
     ];
-
+//
     const sanitizeAmount = (amount) => {
         if (typeof amount === 'string') {
             return amount.replace(/[;^%$]/g, '');  
