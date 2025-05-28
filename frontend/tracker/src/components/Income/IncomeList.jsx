@@ -4,7 +4,7 @@ import TransactionInfoCard from '../cards/TransactionInfoCard';
 import moment from 'moment';
 
 const IncomeList = ({ transactions = [], onDelete, onDownload }) => {
-  // Ensure `transactions` is an array
+  // transactions must be array
   const validTransactions = Array.isArray(transactions) ? transactions : [];
 
   return (
