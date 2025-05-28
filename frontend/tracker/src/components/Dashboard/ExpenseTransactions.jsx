@@ -9,7 +9,7 @@ const ExpenseTransactions = ({ onSeeMore }) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  
+  //comment
   const fetchExpenseDetails = async () => {
     if (loading) return; 
     setLoading(true);
