@@ -42,6 +42,6 @@ export const useUserAuth = () => {
     };
   }, [user, updateUser, clearUser, navigate]);
 
-  // **Add this return so the caller gets the context values!**
+  // add return to return context values
   return { user, updateUser, clearUser };
 };
